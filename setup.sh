@@ -22,7 +22,12 @@ install_ubuntu_dependencies() {
     wget \
     make \
     git \
-    ubuntu-restricted-extras
+    ubuntu-restricted-extras \
+    net-tools \
+    openssh-server \
+    fuse \
+    libfuse2 \
+    gnome-keyring
 
   git config --global init.defaultBranch main
 }
@@ -30,33 +35,6 @@ install_ubuntu_dependencies() {
 remove_snap() {
   sudo systemctl stop snapd
   sudo apt remove --purge --assume-yes snapd gnome-software-plugin-snap
-}
-
-setting_interface() {
-  # setting dock
-  gsettings set org.gnome.desktop.wm.preferences button-layout 'close,minimize,maximize:'
-  gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
-  gsettings set org.gnome.desktop.interface gtk-theme 'Yaru-dark'
-  gsettings set org.gnome.shell.ubuntu color-scheme 'prefer-dark'
-  gsettings set org.gnome.nautilus.icon-view default-zoom-level small
-
-  #fonts
-  gsettings set org.gnome.desktop.interface font-name 'Ubuntu 9'
-  gsettings set org.gnome.desktop.interface document-font-name 'Sans Regular 9'
-  gsettings set org.gnome.desktop.interface monospace-font-name 'Ubuntu Mono 11'
-  gsettings set org.gnome.nautilus.desktop font 'Ubuntu 9'
-  gsettings set org.gnome.desktop.wm.preferences titlebar-font 'Ubuntu Bold 9'
-
-  #date
-  gsettings set org.gnome.desktop.interface clock-show-weekday true
-  gsettings set org.gnome.desktop.interface clock-show-date true
-  gsettings set org.gnome.desktop.interface clock-show-seconds true
-
-  gsettings set org.gnome.mutter center-new-windows true
-
-  #dock
-  gsettings set org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 22
-  gsettings set org.gnome.shell.extensions.dash-to-dock dock-position 'RIGHT'
 }
 
 install_docker() {
@@ -137,6 +115,58 @@ install_dbeaver() {
   sudo apt update && sudo apt install -y dbeaver-ce
 }
 
+install_krita() {
+  sudo apt install krita
+}
+
+install_postman() {
+  curl https://dl.pstmn.io/download/latest/linux64 --output /tmp/postmain.tar.gz
+  sudo tar -xvf /tmp/postmain.tar.gz -C /opt
+  touch ~/.local/share/applications/Postman.desktop
+  printf "
+[Desktop Entry]
+Encoding=UTF-8
+Name=Postman
+Exec=/opt/Postman/app/Postman
+Icon=/opt/Postman/app/resources/app/assets/icon.png
+Terminal=false
+Type=Application
+Categories=Development;
+" >>~/.local/share/applications/Postman.desktop
+}
+
+install_ngrok() {
+  curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
+  echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
+  sudo apt update
+  sudo apt install ngrok
+}
+
+install_docker_compose() {
+  sudo curl -L "https://github.com/docker/compose/releases/download/v2.6.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+  sudo chmod +x /usr/local/bin/docker-compose
+}
+
+install_aws_cli() {
+  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+  unzip awscliv2.zip
+  sudo ./aws/install
+  rm -rf ./awscliv2.zip ./aws
+}
+
+install_inkscape() {
+  sudo add-apt-repository ppa:inkscape.dev/stable
+  sudo apt update
+  sudo apt install -y inkscape
+}
+
+install_brave() {
+  sudo apt install apt-transport-https curl
+  sudo curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
+  echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg arch=amd64] https://brave-browser-apt-release.s3.brave.com/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-release.list
+  sudo apt update
+  sudo apt install brave-browser
+}
 set_mirror_apt
 install_ubuntu_dependencies
 remove_snap
@@ -151,3 +181,6 @@ install_spotify
 install_pulseeffets
 install_github_cli
 install_dbeaver
+install_krita
+install_aws_cli
+install_brave
